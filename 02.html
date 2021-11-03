@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>02</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #c {
+        float: left;
+        padding: 5px;
+        width: 300px;
+        height: 150px;
+      }
+      p {
+        float: left;
+      }
+    </style>
+    <script src="./js/three.js"></script>
+  </head>
+  <body>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec laoreet
+      maximus metus, a interdum massa faucibus id. Pellentesque in mauris elit.
+      Vestibulum quis consectetur nisi. <canvas id="c"></canvas> Nulla
+      pellentesque, sapien in condimentum ullamcorper, mi nisl sollicitudin
+      felis, a ullamcorper sapien dui vel metus. Nam augue nisi, elementum id
+      diam vel, blandit imperdiet nunc. Vivamus facilisis imperdiet neque id
+      porttitor. Mauris sapien felis, mollis tempus orci vitae, sollicitudin
+      varius augue. Nullam non magna id sem faucibus sollicitudin. Proin nunc
+      mi, rutrum et elementum ut, auctor eget massa.
+    </p>
+    <script>
+      const wWidth = window.innerWidth;
+      const wHeight = window.innerHeight;
+      function main() {
+        const canvas = document.querySelector("#c");
+        // 指定渲染一个标签
+        const renderer = new THREE.WebGLRenderer({ canvas });
+        // 设置renderer 大小
+        // renderer.setSize(wWidth, wHeight);
+        // 需要一个摄像机
+        const fov = 70; // 角度
+        const aspect = wWidth / wHeight; // 比例
+        const near = 0.1; // 最近看到 近平面
+        const far = 1000; // 最远看到 远平面
+        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.z = 3; // 摄像机默认指向Z轴负方向，上方向朝向Y轴正方向。我们将会把立方体放置在坐标原点，所以我们需要往后移一下摄像机才能显示出物体
+        // 创建一个场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xaaaaaa);
+        // {
+        //  添加光线
+        const color = 0xffffff;
+        const intensity = 1;
+        const light = new THREE.DirectionalLight(color, intensity);
+        light.position.set(-1, 2, 4);
+        scene.add(light);
+        // }
+        // 创建一个 几何体
+        const boxWidth = 1;
+        const boxHeight = 1;
+        const boxDepth = 1;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+        function makeInstance(geometry, color, x) {
+          const material = new THREE.MeshPhongMaterial({ color });
+
+          const cube = new THREE.Mesh(geometry, material);
+          scene.add(cube);
+
+          cube.position.x = x;
+
+          return cube;
+        }
+        const cubes = [
+          makeInstance(geometry, 0x44aa88, 0),
+          makeInstance(geometry, 0x8844aa, -2),
+          makeInstance(geometry, 0xaa8844, 2),
+        ];
+        // 创建一个材质
+        // const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 }); // 绿蓝色
+        const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 }); // 绿蓝色
+        //在创建一个网格 Mesh 对象 包含了
+        // 1.几何体 Geometry 物体的形状
+        // 2.材质 Material 如何绘制物体 什么颜色 什么贴图等等
+        // 3.对象在场景中相对于他福对象的位置、朝向、缩放、
+        // const cube = new THREE.Mesh(geometry, material);
+
+        // // 最后添加到场景
+        // scene.add(cube);
+        function resizeRendererToDisplaySize(renderer) {
+          const canvas = renderer.domElement;
+          const pixelRatio = window.devicePixelRatio;
+          const width = (canvas.clientWidth * pixelRatio) | 0;
+          const height = (canvas.clientHeight * pixelRatio) | 0;
+          const needResize = canvas.width !== width || canvas.height !== height;
+          if (needResize) {
+            renderer.setSize(width, height, false);
+          }
+          return needResize;
+        }
+        // 渲染
+        function render(time) {
+          time *= 0.001;
+
+          if (resizeRendererToDisplaySize(renderer)) {
+            const canvas = renderer.domElement;
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+          }
+          cubes.forEach((cube, ndx) => {
+            const speed = 1 + ndx * 0.1;
+            const rot = time * speed;
+            cube.rotation.x = rot;
+            cube.rotation.y = rot;
+          });
+          renderer.render(scene, camera);
+
+          requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+      }
+      main();
+    </script>
+  </body>
+</html>
